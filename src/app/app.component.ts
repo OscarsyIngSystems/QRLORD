@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-
+import QRCode from 'qrcode';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -37,6 +37,73 @@ export class AppComponent {
     }
   }
 
+  // async generateQR(): Promise<void> {
+  //   if (!this.url) {
+  //     this.error.set('Por favor ingresa una URL');
+  //     return;
+  //   }
+
+  //   this.loading.set(true);
+  //   this.error.set('');
+
+  //   try {
+  //     // Liberar URL anterior si existe
+  //     if (this.qrImageBlobUrl()) {
+  //       URL.revokeObjectURL(this.qrImageBlobUrl());
+  //     }
+
+  //     // const QRCode = await import('qrcode');
+
+  //     const canvas = document.createElement('canvas');
+
+  //     // Usar el tamaño seleccionado
+  //     canvas.width = this.qrSize();
+  //     canvas.height = this.qrSize();
+
+  //     // Opciones para el QR
+  //     const qrOptions = {
+  //       errorCorrectionLevel: 'H' as const,
+  //       margin: this.calculateMargin(), // Margen dinámico
+  //       width: this.qrSize(),
+  //       color: {
+  //         dark: this.qrColor,
+  //         light: this.backgroundColor,
+  //       },
+  //     };
+
+  //     // Generar QR
+  //     await QRCode.toCanvas(canvas, this.url, qrOptions);
+
+  //     // Agregar logo si existe
+  //     if (this.logoFile) {
+  //       await this.addLogoToQR(canvas);
+  //     }
+
+  //     // Convertir a Blob
+  //     return new Promise<void>((resolve) => {
+  //       canvas.toBlob(
+  //         (blob) => {
+  //           if (blob) {
+  //             const blobUrl = URL.createObjectURL(blob);
+  //             this.qrImageBlobUrl.set(blobUrl);
+  //             this.qrImage.set(this.sanitizer.bypassSecurityTrustUrl(blobUrl));
+  //             resolve();
+  //           } else {
+  //             this.error.set('Error al generar el QR');
+  //             resolve();
+  //           }
+  //         },
+  //         'image/png',
+  //         1 // Calidad máxima
+  //       );
+  //     });
+  //   } catch (err) {
+  //     this.error.set('Error al generar el QR: ' + (err as Error).message);
+  //     console.error(err);
+  //   } finally {
+  //     this.loading.set(false);
+  //   }
+  // }
   async generateQR(): Promise<void> {
     if (!this.url) {
       this.error.set('Por favor ingresa una URL');
@@ -52,17 +119,14 @@ export class AppComponent {
         URL.revokeObjectURL(this.qrImageBlobUrl());
       }
 
-      const QRCode = await import('qrcode');
       const canvas = document.createElement('canvas');
-
-      // Usar el tamaño seleccionado
       canvas.width = this.qrSize();
       canvas.height = this.qrSize();
 
-      // Opciones para el QR
+      // Opciones del QR
       const qrOptions = {
         errorCorrectionLevel: 'H' as const,
-        margin: this.calculateMargin(), // Margen dinámico
+        margin: this.calculateMargin(),
         width: this.qrSize(),
         color: {
           dark: this.qrColor,
@@ -70,15 +134,15 @@ export class AppComponent {
         },
       };
 
-      // Generar QR
-      await QRCode.toCanvas(canvas, this.url, qrOptions);
+      // Generar QR (usa QRCode directamente, sin await import)
+      await QRCode.toCanvas(canvas, this.url, qrOptions); // ✅
 
       // Agregar logo si existe
       if (this.logoFile) {
         await this.addLogoToQR(canvas);
       }
 
-      // Convertir a Blob
+      // Convertir a Blob y actualizar señales
       return new Promise<void>((resolve) => {
         canvas.toBlob(
           (blob) => {
@@ -93,7 +157,7 @@ export class AppComponent {
             }
           },
           'image/png',
-          1 // Calidad máxima
+          1
         );
       });
     } catch (err) {
