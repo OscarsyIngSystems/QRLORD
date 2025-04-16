@@ -45,7 +45,9 @@ button:disabled {
 
 .qr-result {
   margin-top: 20px;
+  display: flex;
   text-align: center;
+  flex-direction: column;
 }
 
 .qr-result img {

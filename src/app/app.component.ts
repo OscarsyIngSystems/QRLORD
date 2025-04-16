@@ -15,12 +15,16 @@ export class AppComponent {
 
   url = '';
   qrImage = signal<SafeUrl | string>('');
-  qrImageBlobUrl = signal<string>(''); // Nueva señal para la URL de descarga
+  qrImageBlobUrl = signal<string>('');
   logoFile: File | null = null;
   qrColor = '#E858F4';
   backgroundColor = '#FFFFFF';
   loading = signal(false);
   error = signal('');
+
+  // Tamaño fijo del QR
+  readonly qrWidth = 450;
+  readonly qrHeight = 450;
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -49,19 +53,30 @@ export class AppComponent {
       const QRCode = await import('qrcode');
       const canvas = document.createElement('canvas');
 
-      await QRCode.toCanvas(canvas, this.url, {
+      // Establecer tamaño fijo de 450x450
+      canvas.width = this.qrWidth;
+      canvas.height = this.qrHeight;
+
+      // Opciones para QR de 450x450
+      const qrOptions = {
+        errorCorrectionLevel: 'H' as const, // Tipo específico para TypeScript
+        margin: 1, // Margen más pequeño para aprovechar mejor el espacio
+        width: this.qrWidth,
         color: {
           dark: this.qrColor,
           light: this.backgroundColor,
         },
-        errorCorrectionLevel: 'H',
-      });
+      };
 
+      // Generar QR con tamaño exacto
+      await QRCode.toCanvas(canvas, this.url, qrOptions);
+
+      // Agregar logo si existe
       if (this.logoFile) {
         await this.addLogoToQR(canvas);
       }
 
-      // Convertir a Blob primero
+      // Convertir a Blob
       return new Promise<void>((resolve) => {
         canvas.toBlob(
           (blob) => {
@@ -76,7 +91,7 @@ export class AppComponent {
             }
           },
           'image/png',
-          1
+          1 // Calidad máxima
         );
       });
     } catch (err) {
@@ -97,11 +112,12 @@ export class AppComponent {
 
       const img = new Image();
       img.onload = () => {
-        const logoSize = canvas.width * 0.2;
+        // Tamaño del logo (15% del tamaño del QR para 450px)
+        const logoSize = 68; // 450 * 0.15 ≈ 68px
         const x = (canvas.width - logoSize) / 2;
         const y = (canvas.height - logoSize) / 2;
 
-        // Crear un círculo blanco de fondo para el logo
+        // Fondo circular para el logo
         ctx.beginPath();
         ctx.arc(
           x + logoSize / 2,
@@ -113,6 +129,9 @@ export class AppComponent {
         ctx.fillStyle = this.backgroundColor;
         ctx.fill();
 
+        // Configuración de calidad para el logo
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, x, y, logoSize, logoSize);
         resolve();
       };
@@ -134,9 +153,8 @@ export class AppComponent {
 
     const link = document.createElement('a');
     link.href = this.qrImageBlobUrl();
-    link.download = `qr-${new Date().getTime()}.png`;
+    link.download = `qr-450x450-${new Date().getTime()}.png`;
 
-    // Necesario para algunos navegadores
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
