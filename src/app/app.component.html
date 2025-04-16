@@ -1,5 +1,5 @@
 <div class="qr-generator-container">
-  <h1>Generador de Códigos QR con Logo</h1>
+  <h1>🔥 QR LORD - El Mejor Generador 🔥</h1>
 
   <div class="form-group">
     <label for="url">URL para el QR:</label>
@@ -11,14 +11,29 @@
     />
   </div>
 
-  <div class="form-group">
-    <label for="qrColor">Color del QR:</label>
-    <input type="color" id="qrColor" [(ngModel)]="qrColor" />
-  </div>
+  <div class="form-row">
+    <div class="form-group color-picker">
+      <label for="qrColor">Color del QR:</label>
+      <div class="color-input-container">
+        <input type="color" id="qrColor" [(ngModel)]="qrColor" />
+        <div class="color-display" [style.background-color]="qrColor"></div>
+      </div>
+    </div>
 
-  <div class="form-group">
-    <label for="backgroundColor">Color de fondo:</label>
-    <input type="color" id="backgroundColor" [(ngModel)]="backgroundColor" />
+    <div class="form-group color-picker">
+      <label for="backgroundColor">Color de fondo:</label>
+      <div class="color-input-container">
+        <input
+          type="color"
+          id="backgroundColor"
+          [(ngModel)]="backgroundColor"
+        />
+        <div
+          class="color-display"
+          [style.background-color]="backgroundColor"
+        ></div>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -31,7 +46,24 @@
     />
   </div>
 
-  <button (click)="generateQR()" [disabled]="loading()">
+  <!-- Control de tamaño del QR -->
+  <div class="form-group size-control">
+    <label>
+      Tamaño del QR: {{ qrSize() }}px
+      <input
+        type="range"
+        [min]="minSize"
+        [max]="maxSize"
+        [(ngModel)]="qrSize"
+      />
+      <div class="size-limits">
+        <span>{{ minSize }}px</span>
+        <span>{{ maxSize }}px</span>
+      </div>
+    </label>
+  </div>
+
+  <button (click)="generateQR()" [disabled]="loading() || !url">
     {{ loading() ? "Generando..." : "Generar QR" }}
   </button>
 
@@ -39,9 +71,13 @@
   <div class="error-message">{{ error() }}</div>
   } @if (qrImage()) {
   <div class="qr-result">
-    <h2>Resultado:</h2>
-    <img [src]="qrImage()" alt="Código QR generado" />
-    <button (click)="downloadQR()">Descargar QR</button>
+    <h2>Vista previa ({{ qrSize() }}×{{ qrSize() }}px):</h2>
+    <div class="qr-preview-container">
+      <img [src]="qrImage()" alt="Código QR generado" class="qr-preview" />
+    </div>
+    <button (click)="downloadQR()" class="download-btn">
+      Descargar QR ({{ qrSize() }}×{{ qrSize() }}px)
+    </button>
   </div>
   }
 </div>

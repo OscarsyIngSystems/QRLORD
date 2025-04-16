@@ -5,6 +5,9 @@
   font-family: Arial, sans-serif;
 }
 
+h1 {
+  text-align: center;
+}
 .form-group {
   margin-bottom: 15px;
 }
@@ -51,8 +54,67 @@ button:disabled {
 }
 
 .qr-result img {
+  margin-top: 20px;
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.size-control {
+  margin: 1.5rem 0;
+
+  input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .size-limits {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+.qr-preview-container {
+  max-width: 100%;
+  overflow: auto;
+  margin: 1rem 0;
+  border: 1px solid #eee;
+  padding: 10px;
+  background: white;
+}
+
+.qr-preview {
+  display: block;
+  margin: 0 auto;
   max-width: 100%;
   height: auto;
-  border: 1px solid #ddd;
-  margin: 10px 0;
+}
+
+.color-picker {
+  .color-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    input[type="color"] {
+      width: 50px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .color-display {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #000;
+      border-radius: 4px;
+      display: inline-block;
+    }
+  }
 }

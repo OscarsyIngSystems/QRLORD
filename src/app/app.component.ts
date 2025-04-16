@@ -13,6 +13,12 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 export class AppComponent {
   title = 'qrGeneratorLord';
 
+  // Control de tamaño del QR
+  qrSize = signal<number>(450); // Valor inicial (450px)
+  readonly minSize = 180; // Tamaño mínimo
+  readonly maxSize = 800; // Tamaño máximo
+
+  // Datos del QR
   url = '';
   qrImage = signal<SafeUrl | string>('');
   qrImageBlobUrl = signal<string>('');
@@ -21,10 +27,6 @@ export class AppComponent {
   backgroundColor = '#FFFFFF';
   loading = signal(false);
   error = signal('');
-
-  // Tamaño fijo del QR
-  readonly qrWidth = 450;
-  readonly qrHeight = 450;
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -53,22 +55,22 @@ export class AppComponent {
       const QRCode = await import('qrcode');
       const canvas = document.createElement('canvas');
 
-      // Establecer tamaño fijo de 450x450
-      canvas.width = this.qrWidth;
-      canvas.height = this.qrHeight;
+      // Usar el tamaño seleccionado
+      canvas.width = this.qrSize();
+      canvas.height = this.qrSize();
 
-      // Opciones para QR de 450x450
+      // Opciones para el QR
       const qrOptions = {
-        errorCorrectionLevel: 'H' as const, // Tipo específico para TypeScript
-        margin: 1, // Margen más pequeño para aprovechar mejor el espacio
-        width: this.qrWidth,
+        errorCorrectionLevel: 'H' as const,
+        margin: this.calculateMargin(), // Margen dinámico
+        width: this.qrSize(),
         color: {
           dark: this.qrColor,
           light: this.backgroundColor,
         },
       };
 
-      // Generar QR con tamaño exacto
+      // Generar QR
       await QRCode.toCanvas(canvas, this.url, qrOptions);
 
       // Agregar logo si existe
@@ -102,6 +104,13 @@ export class AppComponent {
     }
   }
 
+  private calculateMargin(): number {
+    // Margen proporcional al tamaño del QR
+    if (this.qrSize() <= 300) return 1;
+    if (this.qrSize() <= 500) return 2;
+    return 3;
+  }
+
   private async addLogoToQR(canvas: HTMLCanvasElement): Promise<void> {
     return new Promise((resolve, reject) => {
       const ctx = canvas.getContext('2d');
@@ -112,8 +121,8 @@ export class AppComponent {
 
       const img = new Image();
       img.onload = () => {
-        // Tamaño del logo (15% del tamaño del QR para 450px)
-        const logoSize = 68; // 450 * 0.15 ≈ 68px
+        // Tamaño del logo (15% del tamaño del QR)
+        const logoSize = canvas.width * 0.3;
         const x = (canvas.width - logoSize) / 2;
         const y = (canvas.height - logoSize) / 2;
 
@@ -153,7 +162,7 @@ export class AppComponent {
 
     const link = document.createElement('a');
     link.href = this.qrImageBlobUrl();
-    link.download = `qr-450x450-${new Date().getTime()}.png`;
+    link.download = `qr-${this.qrSize()}x${this.qrSize()}-${new Date().getTime()}.png`;
 
     document.body.appendChild(link);
     link.click();
